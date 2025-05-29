@@ -36,5 +36,34 @@ public class Controller {
     }
 
 
+    @PostMapping("/getAllbyId")
+    public ResponseEntity<List<TaskModel>> getAllById(@Valid @RequestBody RequestListUUidsDto requestListUUidsDto){
+        return ResponseEntity.ok(taskService.getAllByTaskId(requestListUUidsDto));
+    }
+
+    @GetMapping("/getAll")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public List<TaskModel> getAll(@CookieValue("jwt_token") String token) {
+
+
+        String cookieHeader = "jwt_token=" + token;
+
+        try {
+            String userIdString = validate.validate(cookieHeader);
+
+
+
+            if (userIdString.isEmpty()) {
+                throw new CustomException("Invalid token or server down");
+            }
+
+            UUID userId = UUID.fromString(userIdString);
+            return taskService.getTasksByUserId(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new CustomException("Invalid UUID or failed to fetch tasks");
+        }
+    }
+
 
 }
